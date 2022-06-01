@@ -46,19 +46,15 @@ async def read_item(request: Request):
 
 
 @app.post("/uploadfile")
-async def create_upload_file(file: UploadFile = File()):
+def create_upload_file(file: UploadFile = File()):
     if not file:
         raise HTTPException(status_code=404, detail="Item not found")
     else:
         filename = file.filename
         readfile = pandas.read_excel(os.path.join(
-            os.getcwd(), filename), header=None, index_col=None)
-        # table_Data = {
-        #     "data": readfile.to_dict(orient='records')
-        # }
-        # await file_collection.insert_many(table_Data)
-
-        # await file_collection.insert_many(readfile.to_dict(orient='records'))
+            os.getcwd(), filename))
+        docs = json.loads(readfile.T.to_json()).values()
+        file_collection.insert_many(docs)
         return{
             "data": readfile.to_dict(orient='records')
         }
